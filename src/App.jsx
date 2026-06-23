@@ -1,71 +1,51 @@
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast"; // 1. IMPORT TOASTER CHUẨN DOANH NGHIỆP Ở ĐÂY
+
+import Login from "./features/auth/pages/Login";
+import DashboardLayout from "./layouts/DashboardLayout";
+import Dashboard from "./features/teacher/pages/Dashboard";
+import ProfilePage from "./features/teacher/pages/ProfilePage";
+import ClassPage from "./features/teacher/pages/ClassPage";
+import StudentsPage from "./features/teacher/pages/StudentsPage";
+
 function App() {
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
-      
-      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-lg p-8">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Attendance Dashboard
-          </h1>
+    <BrowserRouter>
+      {/* 2. ĐẶT TOASTER Ở ĐÂY ĐỂ HIỂN THỊ THÔNG BÁO TOÀN HỆ THỐNG */}
+      <Toaster 
+        position="top-right" 
+        reverseOrder={false} 
+        toastOptions={{
+          // Cấu hình font chữ và bo góc chung cho toàn bộ toast nhìn cho pro
+          style: {
+            fontSize: '13px',
+            fontWeight: '600',
+            borderRadius: '16px',
+            fontFamily: 'sans-serif'
+          }
+        }}
+      />
 
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-            + Add Student
-          </button>
-        </div>
+      <Routes>
+        {/* HỆ THỐNG AUTH */}
+        <Route path="/login" element={<Login />} />
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        {/* HỆ THỐNG TEACHER - Kế thừa giao diện từ DashboardLayout */}
+        <Route path="/teacher" element={<DashboardLayout />}>
+          {/* Tự động hướng vào trang dashboard khi vào /teacher */}
+          <Route index element={<Navigate to="dashboard" replace />} />
           
-          <div className="bg-blue-50 p-4 rounded-xl">
-            <p className="text-sm text-gray-500">Total Students</p>
-            <h2 className="text-2xl font-bold text-blue-600">120</h2>
-          </div>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="class" element={<ClassPage />} />
+          <Route path="students" element={<StudentsPage />} />
+          <Route path="profile" element={<ProfilePage />} />
+        </Route>
 
-          <div className="bg-green-50 p-4 rounded-xl">
-            <p className="text-sm text-gray-500">Present Today</p>
-            <h2 className="text-2xl font-bold text-green-600">98</h2>
-          </div>
-
-          <div className="bg-red-50 p-4 rounded-xl">
-            <p className="text-sm text-gray-500">Absent</p>
-            <h2 className="text-2xl font-bold text-red-600">22</h2>
-          </div>
-
-        </div>
-
-        {/* Table */}
-        <div className="overflow-hidden rounded-xl border">
-          <table className="w-full text-left">
-            <thead className="bg-gray-200 text-gray-700">
-              <tr>
-                <th className="p-3">Name</th>
-                <th className="p-3">Class</th>
-                <th className="p-3">Status</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              <tr className="border-t hover:bg-gray-50">
-                <td className="p-3">Nguyen Van A</td>
-                <td className="p-3">Class 10A</td>
-                <td className="p-3 text-green-600 font-semibold">Present</td>
-              </tr>
-
-              <tr className="border-t hover:bg-gray-50">
-                <td className="p-3">Tran Thi B</td>
-                <td className="p-3">Class 10A</td>
-                <td className="p-3 text-red-600 font-semibold">Absent</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-      </div>
-
-    </div>
-  )
+        {/* Bất kỳ route lạ nào cũng đẩy về login */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
