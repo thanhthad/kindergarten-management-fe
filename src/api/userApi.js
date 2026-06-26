@@ -1,6 +1,7 @@
 import axiosClient from "./axiosClient";
 
 export const userApi = {
+  // do sử dụng userId từ jwtoken nên chỉ cần sử dụng api thôi là tự động map với id của mình 
   // GET /api/users/me
   getMe: () => axiosClient.get("/users/me"),
 

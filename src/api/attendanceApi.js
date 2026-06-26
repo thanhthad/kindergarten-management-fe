@@ -1,27 +1,42 @@
 import axiosClient from "./axiosClient";
 
 export const attendanceApi = {
+
   // ================= INIT =================
   init: () =>
     axiosClient.post("/attendance"),
 
+  // ================= STUDENT STATISTIC =================
+  getStudentStatistic: (studentId) =>
+    axiosClient.get(`/attendance/student/${studentId}/statistic`),
+
+  // ================= CLASS ATTENDANCE =================
+  getClassAttendance: (date) =>
+    axiosClient.get("/attendance/class", {
+      params: { date },
+    }),
+
+  // ================= STUDENT HISTORY =================
+  getStudentHistory: (studentId, params) =>
+    axiosClient.get(`/attendance/student/${studentId}/history`, {
+      params,
+    }),
+
+  // ================= TEACHER SUMMARY ME =================
+  getTeacherSummaryMe: (date) =>
+    axiosClient.get("/attendance/teacher/summary/me", {
+      params: { date },
+    }),
+
+  // ================= GET DATES BY CLASS =================
+  getDatesByClass: (params) =>
+    axiosClient.get("/attendance/dates/class/me", {
+      params,
+    }),
+
   // ================= UPDATE =================
   update: (id, data) =>
     axiosClient.put(`/attendance/${id}`, data),
-
-  // ================= DELETE =================
-  delete: (id) =>
-    axiosClient.delete(`/attendance/${id}`),
-
-  // ================= STUDENT HISTORY =================
-  getStudentHistory: (studentId) =>
-    axiosClient.get(`/attendance/student/${studentId}/history`),
-
-  // ================= CLASS HISTORY =================
-  getClassHistory: (classId, fromDate, toDate, params) =>
-    axiosClient.get(`/attendance/class/history/${classId}`, {
-      params: { fromDate, toDate, ...params },
-    }),
 
   // ================= TEACHER SUMMARY =================
   getTeacherSummary: (teacherId, date) =>
@@ -29,30 +44,24 @@ export const attendanceApi = {
       params: { teacherId, date },
     }),
 
-  // ================= GET DATES BY CLASS =================
-  getDatesByClass: (classId) =>
-    axiosClient.get(`/attendance/dates/class/${classId}`),
-
   // ================= SUMMARY BY CLASS =================
   getSummaryByClass: (classId, date) =>
     axiosClient.get(`/attendance/summary/class/${classId}`, {
       params: { date },
     }),
 
-  // ================= CLASS ATTENDANCE =================
-  getClassAttendance: (classId, date) =>
-    axiosClient.get(`/attendance/class/${classId}`, {
-      params: { date },
-    }),
+  // ================= DELETE =================
+  delete: (id) =>
+    axiosClient.delete(`/attendance/${id}`),
 
   // ================= GET ALL DATES =================
   getAllDates: () =>
     axiosClient.get("/attendance/dates"),
 
   // ================= GET BY DATE =================
-  getByDate: (date) =>
+  getByDate: (date, params) =>
     axiosClient.get("/attendance/date", {
-      params: { date },
+      params: { date, ...params },
     }),
 
   // ================= SUMMARY BY DATE =================
@@ -83,7 +92,9 @@ export const attendanceApi = {
       params: { date, status, ...params },
     }),
 
-  // ================= STUDENT STATISTIC =================
-  getStudentStatistic: (studentId) =>
-    axiosClient.get(`/attendance/student/${studentId}/statistic`),
+  // ================= CLASS HISTORY =================
+  getClassHistory: (classId, fromDate, toDate, params) =>
+    axiosClient.get(`/attendance/class/history/${classId}`, {
+      params: { fromDate, toDate, ...params },
+    }),
 };

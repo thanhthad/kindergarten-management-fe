@@ -3,9 +3,8 @@ import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   LayoutDashboard, 
-  School, 
+  CalendarCheck, 
   Users, 
-  UserCircle, 
   LogOut, 
   Menu, 
   X, 
@@ -26,12 +25,11 @@ const DashboardLayout = () => {
 
   const isActive = (path) => location.pathname === path;
 
-  // Cấu trúc Menu kèm Icon thực tế
+  // ĐỒNG BỘ: Cập nhật lại đường dẫn khớp chính xác với App.jsx
   const menuItems = [
     { text: "Tổng quan Dashboard", path: "/teacher/dashboard", icon: LayoutDashboard },
-    { text: "Lớp học của tôi", path: "/teacher/class", icon: School },
+    { text: "Điểm danh lớp học", path: "/teacher/attendance", icon: CalendarCheck },
     { text: "Quản lý học sinh", path: "/teacher/students", icon: Users },
-    { text: "Tài khoản cá nhân", path: "/teacher/profile", icon: UserCircle },
   ];
 
   return (
@@ -41,7 +39,6 @@ const DashboardLayout = () => {
       <AnimatePresence>
         {isMobileOpen && (
           <>
-            {/* Backdrop làm mờ phía sau */}
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -49,7 +46,6 @@ const DashboardLayout = () => {
               onClick={() => setIsMobileOpen(false)}
               className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 md:hidden"
             />
-            {/* Thanh Sidebar kéo ra */}
             <motion.div 
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
@@ -110,7 +106,6 @@ const DashboardLayout = () => {
       {/* 🖥️ DESKTOP SIDEBAR PANEL */}
       <div className="hidden md:flex w-68 bg-slate-900 text-white flex-col justify-between shrink-0 border-r border-slate-800/40 p-5">
         <div>
-          {/* Logo Brand Head */}
           <div className="flex items-center gap-3 px-3 py-4 mb-6 border-b border-slate-800/60">
             <div className="p-2 bg-indigo-600 rounded-xl text-white shadow-md shadow-indigo-600/10">
               <GraduationCap className="w-5 h-5" />
@@ -120,7 +115,6 @@ const DashboardLayout = () => {
             </span>
           </div>
 
-          {/* Navigation Items */}
           <nav className="space-y-1 relative">
             {menuItems.map((item) => {
               const IconComponent = item.icon;
@@ -148,7 +142,6 @@ const DashboardLayout = () => {
           </nav>
         </div>
 
-        {/* Footer Logout Action Block */}
         <div className="pt-4 border-t border-slate-800/60">
           <button
             onClick={handleLogout}
@@ -161,10 +154,7 @@ const DashboardLayout = () => {
 
       {/* RIGHT WORKSPACE AREA */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        
-        {/* TOP INTERFACE NAVBAR */}
         <header className="bg-white/80 backdrop-blur-md h-16 flex items-center justify-between md:justify-end px-4 sm:px-6 border-b border-slate-200/60 relative z-30">
-          {/* Nút bật Sidebar trên Mobile */}
           <button 
             onClick={() => setIsMobileOpen(true)}
             className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl transition"
@@ -172,53 +162,26 @@ const DashboardLayout = () => {
             <Menu className="w-5 h-5" />
           </button>
 
-          {/* Cụm chức năng & Hồ sơ góc phải */}
           <div className="flex items-center gap-4">
-            {/* Chuông thông báo decor */}
             <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition relative">
               <Bell className="w-4 h-4" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-indigo-600 rounded-full" />
             </button>
-            
-            {/* Phân chia thanh đứng */}
             <div className="w-px h-5 bg-slate-200" />
-
-            {/* Profile trigger block */}
-            <div 
-              className="flex items-center gap-2.5 cursor-pointer group" 
-              onClick={() => navigate("/teacher/profile")}
-            >
-              <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-xs shadow-md shadow-indigo-600/10 group-hover:scale-105 transition-transform">
-                L
+            <div className="flex items-center gap-2.5 group">
+              <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-xs shadow-md shadow-indigo-600/10">
+                GV
               </div>
-              <div className="hidden sm:block text-left">
-                <p className="text-xs font-black text-slate-800 group-hover:text-indigo-600 transition-colors">
-                  Giáo viên Lam Điền
-                </p>
-                <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Lớp mầm non</p>
-              </div>
+              <span className="text-xs font-bold text-slate-700">Giáo Viên</span>
             </div>
           </div>
         </header>
 
-        {/* VIEW ROUTER MAIN OUTLET WORKSPACE */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 md:p-8 bg-slate-50/50">
-          {/* Sử dụng AnimatePresence mode wait để quản lý vòng đời chuyển trang một cách an toàn */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0, scale: 0.99 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.99 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
-              className="h-full"
-            >
-              <Outlet />
-            </motion.div>
-          </AnimatePresence>
-        </main>
+        {/* NỘI DUNG THAY ĐỔI CỦA PAGE */}
+        <div className="flex-1 overflow-y-auto bg-slate-50">
+          <Outlet />
+        </div>
       </div>
-
     </div>
   );
 };

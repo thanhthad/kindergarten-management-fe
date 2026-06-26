@@ -1,6 +1,13 @@
 import axiosClient from "./axiosClient";
 
 export const classApi = {
+
+    // do sử dụng userId từ jwtoken nên chỉ cần sử dụng api thôi là tự động map với id của mình 
+  // ================= GET MY CLASS (JWT) =================
+  getMyClass: () =>
+    axiosClient.get("/classes/teacher/me"),
+
+  
   // ================= GET ALL (PAGING) =================
   // GET /api/classes?page=&size=&sort=
   getAll: (params) =>
@@ -33,9 +40,4 @@ export const classApi = {
 
 
 
-
-  
-  // ================= GET MY CLASS (JWT) =================
-  getMyClass: () =>
-    axiosClient.get("/classes/teacher/me"),
 };
