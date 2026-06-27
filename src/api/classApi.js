@@ -38,6 +38,9 @@ export const classApi = {
   delete: (id) =>
     axiosClient.delete(`/classes/${id}`),
 
+  // ================= GET UNASSIGNED TEACHERS =================
+  getUnassignedTeachers: () =>
+    axiosClient.get("/classes/teachers/unassigned"),
 
 
 };

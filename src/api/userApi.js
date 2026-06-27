@@ -16,19 +16,18 @@ export const userApi = {
 
 
 
-
-  
   // GET /api/users?page=0&size=10
-  getAll: (params) =>
-    axiosClient.get("/users", { params }),
+  getAll: (params) => axiosClient.get("/users", { params }),
 
   // GET /api/users/{id}
-  getById: (id) =>
-    axiosClient.get(`/users/${id}`),
+  getById: (id) => axiosClient.get(`/users/${id}`),
+
+  // POST /api/users
+  // Gửi kèm request body: { fullName, email, phone, password }
+  createUser: (data) => axiosClient.post("/users", data),
 
   // DELETE /api/users/{id}
-  deleteUser: (id) =>
-    axiosClient.delete(`/users/${id}`),
+  deleteUser: (id) => axiosClient.delete(`/users/${id}`),
 
   // GET /api/users/search/fullname?keyword=abc
   searchByFullName: (keyword, params) =>

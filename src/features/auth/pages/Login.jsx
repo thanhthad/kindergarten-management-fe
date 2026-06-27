@@ -20,7 +20,8 @@ const Login = () => {
       localStorage.setItem("userId", userId);
       
       toast.success("Đăng nhập thành công!");
-      navigate("/teacher");
+      // navigate("/teacher");
+      navigate("/attendance"); // Chuyển hướng đến trang quản lý người dùng sau khi đăng nhập thành công
     } catch (err) {
       // Interceptor đã toast lỗi nghiệp vụ, ở đây chỉ tắt loading
     } finally {

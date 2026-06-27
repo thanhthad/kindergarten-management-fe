@@ -1,16 +1,22 @@
 import axiosClient from "./axiosClient";
 
 export const studentApi = {
+  // ================= SEARCH / GET ALL =================
+  // GET /api/students?classId=&name=&address=&page=&size=
+  search: (params) =>
+    axiosClient.get("/students", { params }),
 
-  
-// do sử dụng userId từ jwtoken nên chỉ cần sử dụng api thôi là tự động map với id của mình 
-// ================= GET BY ID =================
+  // ================= GET ALL (explicit paging) =================
+  getAll: (params) =>
+    axiosClient.get("/students/getAll", { params }),
+
+  // ================= GET BY ID =================
   getById: (id) =>
     axiosClient.get(`/students/${id}`),
 
-  // ================= GET CURRENT USER'S CLASS =================
-  getMyClass: () =>
-    axiosClient.get("/students/class/me"),
+  // ================= GET BY CLASS =================
+  getByClass: (classId) =>
+    axiosClient.get(`/students/class/${classId}`),
 
   // ================= CREATE =================
   create: (data) =>
@@ -20,26 +26,7 @@ export const studentApi = {
   update: (id, data) =>
     axiosClient.put(`/students/${id}`, data),
 
-
-
-  
-  // ================= SEARCH / GET ALL =================
-  // GET /api/students?classId=&name=&address=&page=&size=
-  search: (params) =>
-    axiosClient.get("/students", { params }),
-
-  
-  // ================= GET BY CLASS =================
-  getByClass: (classId) =>
-    axiosClient.get(`/students/class/${classId}`),
-  
   // ================= DELETE =================
   delete: (id) =>
     axiosClient.delete(`/students/${id}`),
-
-  // // ================= BULK CREATE =================
-  // bulkCreate: (data) =>
-  //   axiosClient.post("/students/bulk", data),
-
-
 };

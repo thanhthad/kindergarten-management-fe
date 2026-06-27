@@ -33,15 +33,40 @@ let isRefreshing = false;
 let queue = [];
 
 const processQueue = (error, token = null) => {
-  queue.forEach((promise) => {
-    if (error) {
-      promise.reject(error);
-    } else {
-      promise.resolve(token);
-    }
+  queue.forEach((p) => {
+    if (error) p.reject(error);
+    else p.resolve(token);
   });
-
   queue = [];
+};
+
+// ================= SHOW ERROR HANDLER (NEW) =================
+const showError = (error) => {
+  const res = error?.response?.data;
+
+  if (!res) {
+    toast.error("Không thể kết nối tới máy chủ.");
+    return;
+  }
+
+  // 1. Backend validation errors (field errors)
+  if (res.data && typeof res.data === "object") {
+    const fieldErrors = res.data;
+
+    Object.values(fieldErrors).forEach((msg) => {
+      toast.error(msg);
+    });
+
+    return;
+  }
+
+  // 2. Normal message
+  if (res.message) {
+    toast.error(res.message);
+    return;
+  }
+
+  toast.error("Đã xảy ra lỗi không xác định.");
 };
 
 // ================= RESPONSE =================
@@ -51,32 +76,26 @@ axiosClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // ================= 401 => REFRESH TOKEN =================
+    // ================= 401 REFRESH TOKEN =================
     if (
       error.response?.status === 401 &&
       !originalRequest._retry
     ) {
       originalRequest._retry = true;
 
-      const refreshToken =
-        localStorage.getItem("refreshToken");
+      const refreshToken = localStorage.getItem("refreshToken");
 
-      // Không có refresh token
       if (!refreshToken) {
         authService.logout();
         window.location.href = "/login";
-
         return Promise.reject(error);
       }
 
-      // Đang refresh => đưa request vào queue
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           queue.push({ resolve, reject });
-        }).then((newToken) => {
-          originalRequest.headers.Authorization =
-            `Bearer ${newToken}`;
-
+        }).then((token) => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
           return axiosClient(originalRequest);
         });
       }
@@ -86,18 +105,12 @@ axiosClient.interceptors.response.use(
       try {
         const response = await axios.post(
           "http://localhost:8080/api/auth/refresh",
-          {
-            refreshToken,
-          }
+          { refreshToken }
         );
 
-        const newAccessToken =
-          response.data.data.accessToken;
+        const newAccessToken = response.data.data.accessToken;
 
-        localStorage.setItem(
-          "accessToken",
-          newAccessToken
-        );
+        localStorage.setItem("accessToken", newAccessToken);
 
         axiosClient.defaults.headers.common.Authorization =
           `Bearer ${newAccessToken}`;
@@ -113,9 +126,7 @@ axiosClient.interceptors.response.use(
 
         authService.logout();
 
-        toast.error(
-          "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."
-        );
+        toast.error("Phiên đăng nhập đã hết hạn");
 
         window.location.href = "/login";
 
@@ -125,24 +136,8 @@ axiosClient.interceptors.response.use(
       }
     }
 
-    // ================= BUSINESS ERROR =================
-    if (error.response?.data?.message) {
-      toast.error(error.response.data.message);
-    }
-
-    // ================= NETWORK ERROR =================
-    else if (error.request) {
-      toast.error(
-        "Không thể kết nối tới máy chủ."
-      );
-    }
-
-    // ================= UNKNOWN ERROR =================
-    else {
-      toast.error(
-        "Đã xảy ra lỗi không xác định."
-      );
-    }
+    // ================= USE NEW ERROR HANDLER =================
+    showError(error);
 
     return Promise.reject(error);
   }

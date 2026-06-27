@@ -10,17 +10,12 @@ export const attendanceApi = {
   getStudentStatistic: (studentId) =>
     axiosClient.get(`/attendance/student/${studentId}/statistic`),
 
-  // ================= CLASS ATTENDANCE =================
   getClassAttendance: (date) =>
-    axiosClient.get("/attendance/class", {
-      params: { date },
-    }),
+  axiosClient.get(`/attendance/class/${date}`),
 
   // ================= STUDENT HISTORY =================
-  getStudentHistory: (studentId, params) =>
-    axiosClient.get(`/attendance/student/${studentId}/history`, {
-      params,
-    }),
+  getStudentHistory: (studentId) =>
+  axiosClient.get(`/attendance/student/${studentId}/history`),
 
   // ================= TEACHER SUMMARY ME =================
   getTeacherSummaryMe: (date) =>
@@ -28,15 +23,19 @@ export const attendanceApi = {
       params: { date },
     }),
 
-  // ================= GET DATES BY CLASS =================
-  getDatesByClass: (params) =>
-    axiosClient.get("/attendance/dates/class/me", {
-      params,
-    }),
+    // ================= GET DATES BY CLASS =================
+  getDatesByClass: () =>
+    axiosClient.get("/attendance/dates/class/me"),
 
   // ================= UPDATE =================
   update: (id, data) =>
     axiosClient.put(`/attendance/${id}`, data),
+
+  batchUpdate: (data) =>
+    axiosClient.put("/attendance/batch", data),
+
+
+
 
   // ================= TEACHER SUMMARY =================
   getTeacherSummary: (teacherId, date) =>
