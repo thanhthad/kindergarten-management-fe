@@ -40,46 +40,24 @@ const processQueue = (error, token = null) => {
   queue = [];
 };
 
-// ================= SHOW ERROR HANDLER (NEW) =================
-const showError = (error) => {
-  const res = error?.response?.data;
-
-  if (!res) {
-    toast.error("Không thể kết nối tới máy chủ.");
-    return;
-  }
-
-  // 1. Backend validation errors (field errors)
-  if (res.data && typeof res.data === "object") {
-    const fieldErrors = res.data;
-
-    Object.values(fieldErrors).forEach((msg) => {
-      toast.error(msg);
-    });
-
-    return;
-  }
-
-  // 2. Normal message
-  if (res.message) {
-    toast.error(res.message);
-    return;
-  }
-
-  toast.error("Đã xảy ra lỗi không xác định.");
-};
-
 // ================= RESPONSE =================
 axiosClient.interceptors.response.use(
   (response) => response,
 
   async (error) => {
     const originalRequest = error.config;
+    const url = originalRequest?.url;
 
-    // ================= 401 REFRESH TOKEN =================
+    const isAuthRequest =
+      url?.includes("/auth/login") ||
+      url?.includes("/auth/register") ||
+      url?.includes("/auth/refresh");
+
+    // ================= REFRESH TOKEN =================
     if (
       error.response?.status === 401 &&
-      !originalRequest._retry
+      !originalRequest._retry &&
+      !isAuthRequest
     ) {
       originalRequest._retry = true;
 
@@ -126,8 +104,6 @@ axiosClient.interceptors.response.use(
 
         authService.logout();
 
-        toast.error("Phiên đăng nhập đã hết hạn");
-
         window.location.href = "/login";
 
         return Promise.reject(refreshError);
@@ -136,8 +112,18 @@ axiosClient.interceptors.response.use(
       }
     }
 
-    // ================= USE NEW ERROR HANDLER =================
-    showError(error);
+    // ================= GLOBAL ERROR (KHÔNG APPLY LOGIN) =================
+    if (!isAuthRequest) {
+      const res = error?.response?.data;
+
+      if (!res) {
+        toast.error("Không thể kết nối tới máy chủ.");
+      } else if (res.message) {
+        toast.error(res.message);
+      } else {
+        toast.error("Đã xảy ra lỗi không xác định.");
+      }
+    }
 
     return Promise.reject(error);
   }

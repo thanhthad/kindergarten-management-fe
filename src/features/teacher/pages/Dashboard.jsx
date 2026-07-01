@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "react-hot-toast";
 import { 
   Users, 
   UserCheck, 
@@ -58,24 +57,9 @@ const Dashboard = () => {
       if (summaryRes.data.data && summaryRes.data.data.length > 0) {
         setSummaryToday(summaryRes.data.data[0]);
       }
-      
-      toast.success("Đồng bộ dữ liệu hôm nay thành công!", {
-        icon: "✨",
-        style: { 
-          borderRadius: "16px", 
-          background: "#0f172a", 
-          color: "#fff",
-          fontSize: "14px",
-          fontWeight: "500",
-          boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)"
-        }
-      });
     })
     .catch(err => {
       console.error("Lỗi tải thông tin Dashboard", err);
-      toast.error("Không thể tải dữ liệu mới nhất. Vui lòng thử lại!", {
-        style: { borderRadius: "16px", background: "#ef4444", color: "#fff" }
-      });
     })
     .finally(() => setLoading(false));
   }, []);

@@ -5,4 +5,6 @@ export const attendanceSettingApi = {
   // PUT /api/attendance-setting
   update: (data) =>
     axiosClient.put("/attendance-setting", data),
+
+  get: () => axiosClient.get("/attendance-setting")
 };

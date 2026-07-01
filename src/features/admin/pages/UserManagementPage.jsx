@@ -165,22 +165,45 @@ const UserManagementPage = () => {
 
     // ================= CREATE =================
     const handleCreate = async () => {
-        try {
-            const values = await form.validateFields();
-            const loadingToast = toast.loading("Đang tạo tài khoản mới...");
-            
-            await userApi.createUser(values);
-            
-            toast.success("Tạo người dùng mới thành công!", { id: loadingToast, style: { borderRadius: '14px' } });
+    try {
+        const values = await form.validateFields();
+
+        const loadingToast = toast.loading("Đang tạo tài khoản...");
+
+        const res = await userApi.createUser(values);
+
+        // ================= SUCCESS =================
+        if (res.success) {
+            toast.success(res.message, { id: loadingToast });
+
             setCreateOpen(false);
             form.resetFields();
             fetchUsers();
-        } catch (error) {
-            if (!error.errorFields) {
-                toast.error("Tạo tài khoản thất bại!", { style: { borderRadius: '14px' } });
+        }
+
+        // ================= FAIL FROM BACKEND =================
+        else {
+            toast.error(res.message, { id: loadingToast });
+
+            // 👉 MAP FIELD ERROR TỪ BACKEND
+            if (res.data) {
+                Object.keys(res.data).forEach((field) => {
+                    form.setFields([
+                        {
+                            name: field,
+                            errors: [res.data[field]],
+                        },
+                    ]);
+                });
             }
         }
-    };
+
+    } catch (error) {
+        if (!error.errorFields) {
+            toast.error("Tạo tài khoản thất bại!");
+        }
+    }
+};
 
     // ================= COLUMNS (Desktop Only Table) =================
     const columns = [

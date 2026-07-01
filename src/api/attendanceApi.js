@@ -48,7 +48,7 @@ export const attendanceApi = {
     axiosClient.get(`/attendance/summary/class/${classId}`, {
       params: { date },
     }),
-
+    
   // ================= DELETE =================
   delete: (id) =>
     axiosClient.delete(`/attendance/${id}`),

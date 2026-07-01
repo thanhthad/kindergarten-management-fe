@@ -1,18 +1,21 @@
 import axiosClient from "./axiosClient";
 
 export const studentApi = {
-  // ================= SEARCH / GET ALL =================
-  // GET /api/students?classId=&name=&address=&page=&size=
+  // ================= SEARCH =================
   search: (params) =>
     axiosClient.get("/students", { params }),
 
-  // ================= GET ALL (explicit paging) =================
+  // ================= GET ALL =================
   getAll: (params) =>
     axiosClient.get("/students/getAll", { params }),
 
   // ================= GET BY ID =================
   getById: (id) =>
     axiosClient.get(`/students/${id}`),
+
+  // ================= GET STUDENTS OF MY CLASS =================
+  getMyClass: () =>
+    axiosClient.get("/students/class/me"),
 
   // ================= GET BY CLASS =================
   getByClass: (classId) =>
@@ -29,4 +32,5 @@ export const studentApi = {
   // ================= DELETE =================
   delete: (id) =>
     axiosClient.delete(`/students/${id}`),
+  
 };

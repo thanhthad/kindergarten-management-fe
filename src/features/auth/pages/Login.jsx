@@ -1,74 +1,195 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { Mail, Lock, Eye, EyeOff, Loader2, GraduationCap, ShieldAlert, CheckCircle2 } from "lucide-react";
 import { authApi } from "../../../api/authApi";
-import toast from "react-hot-toast";
 
-const Login = () => {
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false);
+// Cấu hình animation chuyển động mượt mà
+const fadeUpVariants = {
+  hidden: { opacity: 0, y: 25 },
+  visible: (custom) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: custom * 0.1 }
+  })
+};
+
+function Login() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: "", type: "error" });
+  
+  const [formData, setFormData] = useState({
+    email: "",
+    password: ""
+  });
 
-  const handleSubmit = async (e) => {
+  // Tự động đóng toast sau 4 giây
+  useEffect(() => {
+    if (toast.show) {
+      const timer = setTimeout(() => setToast(prev => ({ ...prev, show: false })), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast.show]);
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     try {
-      const res = await authApi.login(form);
-      const { accessToken, refreshToken, userId } = res.data.data;
+      const res = await authApi.login(formData);
+      const loginData = res.data.data;
+
+      localStorage.setItem("accessToken", loginData.accessToken);
+      localStorage.setItem("refreshToken", loginData.refreshToken);
+      localStorage.setItem("userId", loginData.userId);
+
+      setToast({ show: true, message: "Đăng nhập thành công! Đang chuyển hướng...", type: "success" });
       
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
-      localStorage.setItem("userId", userId);
-      
-      toast.success("Đăng nhập thành công!");
-      // navigate("/teacher");
-      navigate("/attendance"); // Chuyển hướng đến trang quản lý người dùng sau khi đăng nhập thành công
-    } catch (err) {
-      // Interceptor đã toast lỗi nghiệp vụ, ở đây chỉ tắt loading
+      // Giữ nguyên logic điều hướng theo role của bạn
+      setTimeout(() => {
+        navigate(loginData.role === "ADMIN" ? "/admin" : "/teacher");
+      }, 1000);
+
+    } catch (error) {
+      setToast({
+        show: true,
+        message: error.response?.data?.message || "Email hoặc mật khẩu không đúng",
+        type: "error"
+      });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-      <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-        <h2 className="text-2xl font-bold text-center text-slate-800 mb-2">Hệ Thống Quản Lý Học Sinh</h2>
-        <p className="text-sm text-slate-500 text-center mb-6">Vui lòng đăng nhập tài khoản giáo viên</p>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">Email</label>
-            <input
-              required
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full border p-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
-              placeholder="example@gmail.com"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">Mật khẩu</label>
-            <input
-              required
-              type="password"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="w-full border p-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
-              placeholder="••••••••"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-sm font-semibold transition shadow-sm disabled:opacity-50"
+    <div className="min-h-screen bg-slate-50/50 flex flex-col md:flex-row font-sans tracking-tight antialiased selection:bg-indigo-600 selection:text-white overflow-hidden">
+      
+      {/* 🔔 HỆ THỐNG TOAST */}
+      <AnimatePresence>
+        {toast.show && (
+          <motion.div 
+            initial={{ opacity: 0, y: -40, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className={`fixed top-6 right-4 left-4 sm:left-auto z-50 flex items-center gap-3 p-4 rounded-2xl shadow-2xl text-white backdrop-blur-md max-w-sm sm:w-96 border ${
+              toast.type === "success" ? "bg-emerald-600/95 border-emerald-500" : "bg-rose-600/95 border-rose-500"
+            }`}
           >
-            {loading ? "Đang xử lý..." : "Đăng Nhập"}
-          </button>
-        </form>
+            {toast.type === "success" ? <CheckCircle2 className="w-5 h-5 shrink-0" /> : <ShieldAlert className="w-5 h-5 shrink-0" />}
+            <p className="text-xs font-semibold tracking-wide flex-1">{toast.message}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 🎨 BÊN TRÁI: BANNER */}
+      <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-indigo-700 via-blue-600 to-indigo-900 p-12 flex-col justify-between relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-3xl -mr-32 -mt-32" />
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500/10 rounded-full blur-2xl -ml-16 -mb-16" />
+
+        <div className="relative z-10 flex items-center gap-2.5 text-white">
+          <div className="p-2 bg-white/10 border border-white/10 rounded-xl backdrop-blur-md">
+            <GraduationCap className="w-6 h-6" />
+          </div>
+          <span className="font-black text-lg uppercase tracking-widest">KidAttend</span>
+        </div>
+
+        <div className="relative z-10 my-auto max-w-md">
+          <motion.h2 
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-4xl font-black text-white leading-tight tracking-tight"
+          >
+            Nền tảng điểm danh <br />& Quản lý học sinh thông minh.
+          </motion.h2>
+          <motion.p 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-indigo-100 text-sm mt-4 font-medium leading-relaxed"
+          >
+            Giải pháp đồng bộ realtime tối ưu hóa thời gian lên lớp cho giáo viên mầm non Lam Điền.
+          </motion.p>
+        </div>
+
+        <div className="relative z-10 text-xs text-white/40 font-semibold tracking-widest uppercase">
+          © {new Date().getFullYear()} KidAttend Security Ecosystem
+        </div>
+      </div>
+
+      {/* 🔐 BÊN PHẢI: FORM */}
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-12 md:p-16 bg-white/40 backdrop-blur-md relative">
+        <div className="w-full max-w-sm flex flex-col">
+          <div className="flex items-center gap-2 mb-8 md:hidden justify-center">
+            <div className="p-2 bg-indigo-600 text-white rounded-xl shadow-md">
+              <GraduationCap className="w-6 h-6" />
+            </div>
+            <span className="font-black text-lg text-slate-800 uppercase tracking-widest">KidAttend</span>
+          </div>
+
+          <div className="mb-8 text-center md:text-left">
+            <motion.h1 custom={0} variants={fadeUpVariants} initial="hidden" animate="visible" className="text-2xl font-black text-slate-800 tracking-tight sm:text-3xl">
+              Chào mừng trở lại 👋
+            </motion.h1>
+            <motion.p custom={1} variants={fadeUpVariants} initial="hidden" animate="visible" className="text-slate-400 text-xs mt-1 font-medium">
+              Vui lòng đăng nhập tài khoản để tiếp tục làm việc.
+            </motion.p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <motion.div custom={2} variants={fadeUpVariants} initial="hidden" animate="visible">
+              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Địa chỉ Email</label>
+              <div className="relative group">
+                <Mail className="w-4 h-4 text-slate-400 absolute left-4 top-3.5 group-focus-within:text-indigo-600 transition-colors" />
+                <input
+                  type="email" name="email" value={formData.email} onChange={handleChange} required
+                  className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-xs"
+                  placeholder="name@kidattend.com"
+                />
+              </div>
+            </motion.div>
+
+            <motion.div custom={3} variants={fadeUpVariants} initial="hidden" animate="visible">
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Mật khẩu bảo mật</label>
+              </div>
+              <div className="relative group">
+                <Lock className="w-4 h-4 text-slate-400 absolute left-4 top-3.5 group-focus-within:text-indigo-600 transition-colors" />
+                <input
+                  type={showPassword ? "text" : "password"} name="password" value={formData.password} onChange={handleChange} required
+                  className="w-full pl-11 pr-12 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-xs"
+                  placeholder="••••••••"
+                />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-3.5 text-slate-400 hover:text-slate-600 transition-colors">
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </motion.div>
+
+            <motion.div custom={4} variants={fadeUpVariants} initial="hidden" animate="visible" className="pt-2">
+              <motion.button
+                whileHover={{ scale: loading ? 1 : 1.015 }}
+                whileTap={{ scale: loading ? 1 : 0.985 }}
+                type="submit" disabled={loading}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-70 uppercase tracking-wider"
+              >
+                {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> <span>Đang xác thực...</span></> : <span>Đăng nhập hệ thống</span>}
+              </motion.button>
+            </motion.div>
+          </form>
+        </div>
       </div>
     </div>
   );
-};
+}
 
 export default Login;

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
+import AdminLayout from "./layouts/AdminLayout";
 import Login from "./features/auth/pages/Login";
 import DashboardLayout from "./layouts/DashboardLayout";
 import StudentsPage from "./features/teacher/pages/StudentsPage";
@@ -10,8 +11,8 @@ import Dashboard from "./features/teacher/pages/Dashboard";
 import AttendancePage from "./features/teacher/pages/AttendancePage";
 import StudentManagementPage from "./features/admin/pages/StudentManagementPage";
 import TeacherStudentPage from "./features/teacher/pages/TeacherStudentPage";
-import AttendanceManagementPage from "./features/admin/pages/AttendanceManagementPage";
-
+import AttendanceDashboardPage from "./features/admin/pages/AttendanceDashboardPage";
+import AttendanceSettingPage from "./features/admin/pages/AttendanceSettingPage";
 function App() {
   return (
     <BrowserRouter>
@@ -39,10 +40,16 @@ function App() {
           <Route path="students" element={<TeacherStudentPage />} />
         </Route>
 
-        <Route path="/users" element={<UserManagementPage />} />
-        <Route path="/classes" element={<ClassManagementPage />} />
-        <Route path="/students" element={<StudentManagementPage />} />
-        <Route path="/attendance" element={<AttendanceManagementPage />} />
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="users" element={<UserManagementPage />} />
+          <Route path="classes" element={<ClassManagementPage />} />
+          <Route path="students" element={<StudentManagementPage />} />
+          <Route path="dashboard" element={<AttendanceDashboardPage />} />
+          <Route path="settings" element={<AttendanceSettingPage />} />
+        </Route>
+
+
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
